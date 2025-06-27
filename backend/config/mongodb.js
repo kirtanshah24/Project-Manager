@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import { UserModel, ClientModel, ProjectModel, TaskModel, InvoiceModel, ExpenseModel, TimeEntryModel } from '../models/index.js';
 
 const connectDB = async () => {
     try {
