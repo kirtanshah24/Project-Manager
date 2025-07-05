@@ -25,13 +25,14 @@ import Analytics from './pages/Analytics'
 import Login from './pages/Login'
 import ForgotPassword from './pages/ForgotPassword'
 import ProjectDetail from './pages/ProjectDetail'
+import ChangePassword from './pages/ChangePassword'
 
 const App = () => {
   const location = useLocation()
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
   
   // List of routes that should NOT show the main layout
-  const authRoutes = ['/login', '/forgot-password']
+  const authRoutes = ['/login', '/forgot-password', '/change-password']
   const isAuthRoute = authRoutes.includes(location.pathname)
 
   const toggleSidebar = () => {
@@ -59,6 +60,7 @@ const App = () => {
                   {/* Auth routes */}
                   <Route path="/login" element={<Login />} />
                   <Route path="/forgot-password" element={<ForgotPassword />} />
+                  <Route path="/change-password" element={<ChangePassword />} />
 
                   {/* Main app routes */}
                   <Route path="/" element={<Dashboard />} />

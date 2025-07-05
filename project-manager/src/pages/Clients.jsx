@@ -3,7 +3,7 @@ import { useClients } from '../context/ClientContext'
 import { useProjects } from '../context/ProjectContext'
 
 const Clients = () => {
-  const { clients, addClient, updateClient, deleteClient, getClientInvoices } = useClients()
+  const { clients, addClient, updateClient, deleteClient, getClientInvoices, loading } = useClients()
   const { projects } = useProjects()
   const [showModal, setShowModal] = useState(false)
   const [editingClient, setEditingClient] = useState(null)
@@ -13,28 +13,34 @@ const Clients = () => {
     phone: '',
     company: '',
     address: '',
-    notes: ''
+    notes: '',
+    status: 'active'
   })
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     
-    if (editingClient) {
-      updateClient(editingClient.id, formData)
-    } else {
-      addClient(formData)
+    try {
+      if (editingClient) {
+        await updateClient(editingClient._id, formData)
+      } else {
+        await addClient(formData)
+      }
+      
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        company: '',
+        address: '',
+        notes: '',
+        status: 'active'
+      })
+      setEditingClient(null)
+      setShowModal(false)
+    } catch (error) {
+      // Error handling is done in the context
     }
-    
-    setFormData({
-      name: '',
-      email: '',
-      phone: '',
-      company: '',
-      address: '',
-      notes: ''
-    })
-    setEditingClient(null)
-    setShowModal(false)
   }
 
   const handleEdit = (client) => {
@@ -45,19 +51,35 @@ const Clients = () => {
       phone: client.phone,
       company: client.company,
       address: client.address,
-      notes: client.notes
+      notes: client.notes,
+      status: client.status || 'active'
     })
     setShowModal(true)
   }
 
-  const handleDelete = (clientId) => {
+  const handleDelete = async (clientId) => {
     if (window.confirm('Are you sure you want to delete this client?')) {
-      deleteClient(clientId)
+      try {
+        await deleteClient(clientId)
+      } catch (error) {
+        // Error handling is done in the context
+      }
     }
   }
 
   const getClientProjects = (clientId) => {
     return projects.filter(project => project.clientId === clientId)
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading clients...</p>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -78,8 +100,8 @@ const Clients = () => {
       {/* Clients Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {clients.map((client) => {
-          const clientProjects = getClientProjects(client.id)
-          const clientInvoices = getClientInvoices(client.id)
+          const clientProjects = getClientProjects(client._id)
+          const clientInvoices = getClientInvoices(client._id)
           const totalRevenue = clientInvoices
             .filter(inv => inv.status === 'paid')
             .reduce((sum, inv) => sum + inv.amount, 0)
@@ -150,7 +172,7 @@ const Clients = () => {
                   Edit
                 </button>
                 <button
-                  onClick={() => handleDelete(client.id)}
+                  onClick={() => handleDelete(client._id)}
                   className="flex-1 bg-red-100 text-red-700 px-3 py-2 rounded-md text-sm hover:bg-red-200 transition-colors"
                 >
                   Delete
@@ -211,10 +233,11 @@ const Clients = () => {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email
+                  Email *
                 </label>
                 <input
                   type="email"
+                  required
                   value={formData.email}
                   onChange={(e) => setFormData({...formData, email: e.target.value})}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -243,6 +266,21 @@ const Clients = () => {
                   rows="2"
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Status
+                </label>
+                <select
+                  value={formData.status}
+                  onChange={(e) => setFormData({...formData, status: e.target.value})}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="prospect">Prospect</option>
+                </select>
               </div>
 
               <div>

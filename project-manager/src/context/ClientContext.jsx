@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react'
 import { toast } from 'react-toastify'
+import { clientAPI } from '../utils/api'
 
 const ClientContext = createContext()
 
@@ -15,52 +16,78 @@ export const ClientProvider = ({ children }) => {
   const [clients, setClients] = useState([])
   const [invoices, setInvoices] = useState([])
   const [expenses, setExpenses] = useState([])
+  const [loading, setLoading] = useState(false)
 
+  // Load clients from API on component mount
   useEffect(() => {
-    // Load data from localStorage
-    const storedClients = localStorage.getItem('freelancer_clients')
-    const storedInvoices = localStorage.getItem('freelancer_invoices')
-    const storedExpenses = localStorage.getItem('freelancer_expenses')
-
-    if (storedClients) setClients(JSON.parse(storedClients))
-    if (storedInvoices) setInvoices(JSON.parse(storedInvoices))
-    if (storedExpenses) setExpenses(JSON.parse(storedExpenses))
+    loadClients()
   }, [])
 
-  useEffect(() => {
-    localStorage.setItem('freelancer_clients', JSON.stringify(clients))
-  }, [clients])
-
-  useEffect(() => {
-    localStorage.setItem('freelancer_invoices', JSON.stringify(invoices))
-  }, [invoices])
-
-  useEffect(() => {
-    localStorage.setItem('freelancer_expenses', JSON.stringify(expenses))
-  }, [expenses])
+  // Load clients from API
+  const loadClients = async () => {
+    try {
+      setLoading(true)
+      const response = await clientAPI.getClients()
+      if (response.success) {
+        setClients(response.data.docs || response.data)
+      }
+    } catch (error) {
+      console.error('Error loading clients:', error)
+      toast.error('Failed to load clients')
+    } finally {
+      setLoading(false)
+    }
+  }
 
   // Client CRUD operations
-  const addClient = (client) => {
-    const newClient = {
-      ...client,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-      status: 'active'
+  const addClient = async (clientData) => {
+    try {
+      setLoading(true)
+      const response = await clientAPI.addClient(clientData)
+      if (response.success) {
+        setClients(prev => [...prev, response.data.client])
+        toast.success('Client added successfully!')
+      }
+    } catch (error) {
+      console.error('Error adding client:', error)
+      toast.error(error.message || 'Failed to add client')
+    } finally {
+      setLoading(false)
     }
-    setClients(prev => [...prev, newClient])
-    toast.success('Client added successfully!')
   }
 
-  const updateClient = (id, updates) => {
-    setClients(prev => prev.map(client => 
-      client.id === id ? { ...client, ...updates } : client
-    ))
-    toast.success('Client updated successfully!')
+  const updateClient = async (id, updates) => {
+    try {
+      setLoading(true)
+      const response = await clientAPI.updateClient(id, updates)
+      if (response.success) {
+        setClients(prev => prev.map(client => 
+          client._id === id ? response.data.client : client
+        ))
+        toast.success('Client updated successfully!')
+      }
+    } catch (error) {
+      console.error('Error updating client:', error)
+      toast.error(error.message || 'Failed to update client')
+    } finally {
+      setLoading(false)
+    }
   }
 
-  const deleteClient = (id) => {
-    setClients(prev => prev.filter(client => client.id !== id))
-    toast.success('Client deleted successfully!')
+  const deleteClient = async (id) => {
+    try {
+      setLoading(true)
+      const response = await clientAPI.deleteClient(id)
+      if (response.success) {
+        setClients(prev => prev.filter(client => client._id !== id))
+        toast.success('Client deleted successfully!')
+      }
+    } catch (error) {
+      console.error('Error deleting client:', error)
+      toast.error(error.message || 'Failed to delete client')
+    } finally {
+      setLoading(false)
+    }
   }
 
   // Invoice CRUD operations
@@ -137,9 +164,11 @@ export const ClientProvider = ({ children }) => {
     clients,
     invoices,
     expenses,
+    loading,
     addClient,
     updateClient,
     deleteClient,
+    loadClients,
     addInvoice,
     updateInvoice,
     deleteInvoice,

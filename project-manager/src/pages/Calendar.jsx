@@ -83,7 +83,6 @@ const Calendar = () => {
       // Mobile-specific settings
       selectable: true,
       selectMirror: true,
-      dayMaxEvents: true,
       weekends: true,
       editable: false,
       droppable: false,

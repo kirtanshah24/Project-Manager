@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import mongoosePaginate from 'mongoose-paginate-v2';
 
 const clientSchema = new mongoose.Schema({
   userId: {
@@ -69,5 +70,8 @@ const clientSchema = new mongoose.Schema({
 // Index for efficient queries
 clientSchema.index({ userId: 1, name: 1 });
 clientSchema.index({ userId: 1, email: 1 });
+
+// Add pagination plugin
+clientSchema.plugin(mongoosePaginate);
 
 export default mongoose.model('Client', clientSchema); 

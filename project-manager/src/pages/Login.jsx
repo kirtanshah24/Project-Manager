@@ -1,9 +1,14 @@
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../context/AuthContext'
+import { toast } from 'react-toastify'
+import { authAPI } from '../utils/api'
 
 const Login = () => {
   const [form, setForm] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
+  const { login } = useAuth()
+  const navigate = useNavigate()
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value })
@@ -12,8 +17,18 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoading(true)
-    // TODO: Add your login logic here
-    setTimeout(() => setLoading(false), 1000)
+    
+    try {
+      const data = await authAPI.login(form)
+      await login(data.data.user, data.data.token)
+      toast.success('Login successful!')
+      navigate('/')
+    } catch (error) {
+      console.error('Login error:', error)
+      toast.error(error.message || 'Login failed')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
