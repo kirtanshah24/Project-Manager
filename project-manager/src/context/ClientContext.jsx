@@ -15,7 +15,6 @@ export const useClients = () => {
 export const ClientProvider = ({ children }) => {
   const [clients, setClients] = useState([])
   const [invoices, setInvoices] = useState([])
-  const [expenses, setExpenses] = useState([])
   const [loading, setLoading] = useState(false)
   const [isInitialized, setIsInitialized] = useState(false)
 
@@ -127,28 +126,7 @@ export const ClientProvider = ({ children }) => {
     toast.success('Invoice deleted successfully!')
   }
 
-  // Expense CRUD operations
-  const addExpense = (expense) => {
-    const newExpense = {
-      ...expense,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString()
-    }
-    setExpenses(prev => [...prev, newExpense])
-    toast.success('Expense added successfully!')
-  }
 
-  const updateExpense = (id, updates) => {
-    setExpenses(prev => prev.map(expense => 
-      expense.id === id ? { ...expense, ...updates } : expense
-    ))
-    toast.success('Expense updated successfully!')
-  }
-
-  const deleteExpense = (id) => {
-    setExpenses(prev => prev.filter(expense => expense.id !== id))
-    toast.success('Expense deleted successfully!')
-  }
 
   // Helper functions
   const generateInvoiceNumber = () => {
@@ -161,14 +139,11 @@ export const ClientProvider = ({ children }) => {
     return invoices.filter(invoice => invoice.clientId === clientId)
   }
 
-  const getClientExpenses = (clientId) => {
-    return expenses.filter(expense => expense.clientId === clientId)
-  }
+
 
   const value = {
     clients,
     invoices,
-    expenses,
     loading,
     addClient,
     updateClient,
@@ -178,11 +153,7 @@ export const ClientProvider = ({ children }) => {
     updateInvoice,
     deleteInvoice,
     updateInvoiceStatus,
-    addExpense,
-    updateExpense,
-    deleteExpense,
-    getClientInvoices,
-    getClientExpenses
+    getClientInvoices
   }
 
   return (

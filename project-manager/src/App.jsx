@@ -8,6 +8,7 @@ import { ProjectProvider } from './context/ProjectContext'
 import { ClientProvider } from './context/ClientContext'
 import { AuthProvider } from './context/AuthContext'
 import { TaskProvider } from './context/TaskContext'
+import { ExpenseProvider } from './context/ExpenseContext'
 
 // Components
 import Navbar from './components/Navbar'
@@ -49,38 +50,40 @@ const App = () => {
       <ProjectProvider>
         <ClientProvider>
           <TaskProvider>
-            <div className="min-h-screen bg-gray-50">
-            {!isAuthRoute && (
-              <Navbar toggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
-            )}
-            <div className="flex">
+            <ExpenseProvider>
+              <div className="min-h-screen bg-gray-50">
               {!isAuthRoute && (
-                <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
+                <Navbar toggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
               )}
-              <main className="flex-1 p-4 lg:p-6">
-                <Routes>
-                  {/* Auth routes */}
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/forgot-password" element={<ForgotPassword />} />
-                  <Route path="/change-password" element={<ChangePassword />} />
+              <div className="flex">
+                {!isAuthRoute && (
+                  <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
+                )}
+                <main className="flex-1 p-4 lg:p-6">
+                  <Routes>
+                    {/* Auth routes */}
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/forgot-password" element={<ForgotPassword />} />
+                    <Route path="/change-password" element={<ChangePassword />} />
 
-                  {/* Main app routes */}
-                  <Route path="/" element={<Dashboard />} />
-                  <Route path="/projects" element={<Projects />} />
-                  <Route path="/clients" element={<Clients />} />
-                  <Route path="/tasks" element={<Tasks />} />
-                  <Route path="/invoices" element={<Invoices />} />
-                  <Route path="/invoices/:id" element={<InvoiceDetail />} />
-                  <Route path="/expenses" element={<Expenses />} />
-                  <Route path="/calendar" element={<Calendar />} />
-                  <Route path="/analytics" element={<Analytics />} />
-                  <Route path="/projects/:id" element={<ProjectDetail />} />
-                </Routes>
-              </main>
+                    {/* Main app routes */}
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/projects" element={<Projects />} />
+                    <Route path="/clients" element={<Clients />} />
+                    <Route path="/tasks" element={<Tasks />} />
+                    <Route path="/invoices" element={<Invoices />} />
+                    <Route path="/invoices/:id" element={<InvoiceDetail />} />
+                    <Route path="/expenses" element={<Expenses />} />
+                    <Route path="/calendar" element={<Calendar />} />
+                    <Route path="/analytics" element={<Analytics />} />
+                    <Route path="/projects/:id" element={<ProjectDetail />} />
+                  </Routes>
+                </main>
+              </div>
+              <ToastContainer position="top-right" />
             </div>
-            <ToastContainer position="top-right" />
-          </div>
-        </TaskProvider>
+            </ExpenseProvider>
+          </TaskProvider>
         </ClientProvider>
       </ProjectProvider>
     </AuthProvider>

@@ -11,6 +11,10 @@ const expenseSchema = new mongoose.Schema({
     ref: 'Project',
     required: true
   },
+  taskId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Task'
+  },
   description: {
     type: String,
     required: [true, 'Expense description is required'],
@@ -68,6 +72,7 @@ const expenseSchema = new mongoose.Schema({
 
 // Indexes for efficient queries
 expenseSchema.index({ userId: 1, projectId: 1 });
+expenseSchema.index({ userId: 1, taskId: 1 });
 expenseSchema.index({ userId: 1, date: 1 });
 expenseSchema.index({ userId: 1, category: 1 });
 

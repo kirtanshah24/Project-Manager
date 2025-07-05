@@ -198,4 +198,57 @@ export const taskAPI = {
   getTaskStats: async () => {
     return apiCall('/tasks/stats');
   },
+};
+
+// Expense API calls
+export const expenseAPI = {
+  // Get all expenses
+  getExpenses: async (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    const endpoint = queryString ? `/expenses?${queryString}` : '/expenses';
+    return apiCall(endpoint);
+  },
+
+  // Get single expense
+  getExpense: async (id) => {
+    return apiCall(`/expenses/${id}`);
+  },
+
+  // Add new expense
+  addExpense: async (expenseData) => {
+    return apiCall('/expenses', {
+      method: 'POST',
+      body: JSON.stringify(expenseData),
+    });
+  },
+
+  // Update expense
+  updateExpense: async (id, expenseData) => {
+    return apiCall(`/expenses/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(expenseData),
+    });
+  },
+
+  // Delete expense
+  deleteExpense: async (id) => {
+    return apiCall(`/expenses/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Update expense reimbursement status
+  updateExpenseReimbursement: async (id, reimbursementData) => {
+    return apiCall(`/expenses/${id}/reimbursement`, {
+      method: 'PATCH',
+      body: JSON.stringify(reimbursementData),
+    });
+  },
+
+  // Get expense statistics
+  getExpenseStats: async (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    const endpoint = queryString ? `/expenses/stats?${queryString}` : '/expenses/stats';
+    return apiCall(endpoint);
+  },
 }; 

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useProjects } from '../context/ProjectContext';
 import { useClients } from '../context/ClientContext';
+import { useExpenses } from '../context/ExpenseContext';
 import { toast } from 'react-toastify';
 
 // Reusable Card Component
@@ -18,10 +19,11 @@ const InfoCard = ({ title, children, actions }) => (
 const ProjectDetail = () => {
     const { id } = useParams();
     const { projects, tasks, addTask, updateTask, deleteTask } = useProjects();
-    const { clients, expenses, addExpense, deleteExpense } = useClients();
+    const { clients } = useClients();
+    const { expenses, addExpense, deleteExpense } = useExpenses();
 
-    const project = projects.find(p => p.id === id);
-    const client = clients.find(c => c.id === project?.clientId);
+    const project = projects.find(p => p._id === id);
+    const client = clients.find(c => c._id === project?.clientId);
     const projectTasks = tasks.filter(t => t.projectId === id);
     const projectExpenses = expenses.filter(e => e.projectId === id);
 
@@ -111,12 +113,17 @@ const ProjectDetail = () => {
     const isOverdue = (dueDate) => dueDate && new Date(dueDate) < new Date();
 
     // Handlers for Expenses
-    const handleExpenseSubmit = (e) => {
+    const handleExpenseSubmit = async (e) => {
         e.preventDefault();
-        addExpense({ ...expenseFormData, projectId: id, amount: parseFloat(expenseFormData.amount) });
-        toast.success("Expense added!");
-        setShowExpenseModal(false);
-        setExpenseFormData({ description: '', amount: '' });
+        const result = await addExpense({ 
+            ...expenseFormData, 
+            projectId: id, 
+            amount: parseFloat(expenseFormData.amount) 
+        });
+        if (result.success) {
+            setShowExpenseModal(false);
+            setExpenseFormData({ description: '', amount: '' });
+        }
     };
 
     return (
@@ -190,10 +197,10 @@ const ProjectDetail = () => {
                     >
                          <ul className="divide-y divide-gray-200">
                             {projectExpenses.map(exp => (
-                                <li key={exp.id} className="py-3 flex justify-between items-center">
+                                <li key={exp._id} className="py-3 flex justify-between items-center">
                                     <p className="text-gray-800">{exp.description}</p>
                                     <p className="font-semibold">${exp.amount.toFixed(2)}</p>
-                                    <button onClick={() => deleteExpense(exp.id)} className="text-sm text-red-600">Delete</button>
+                                    <button onClick={() => deleteExpense(exp._id)} className="text-sm text-red-600">Delete</button>
                                 </li>
                             ))}
                             {projectExpenses.length === 0 && <p className="text-gray-500">No expenses for this project yet.</p>}

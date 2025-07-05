@@ -2,11 +2,13 @@ import React from 'react'
 import { useProjects } from '../context/ProjectContext'
 import { useClients } from '../context/ClientContext'
 import { useTask } from '../context/TaskContext'
+import { useExpenses } from '../context/ExpenseContext'
 
 const Dashboard = () => {
   const { projects } = useProjects()
-  const { clients, invoices, expenses } = useClients()
+  const { clients, invoices } = useClients()
   const { tasks } = useTask()
+  const { expenses } = useExpenses()
 
   // Calculate statistics
   const activeProjects = projects.filter(p => p.status === 'active').length
