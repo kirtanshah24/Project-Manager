@@ -4,7 +4,15 @@ import { useProjects } from '../context/ProjectContext'
 
 const Clients = () => {
   const { clients, addClient, updateClient, deleteClient, getClientInvoices, loading } = useClients()
-  const { projects } = useProjects()
+  const { projects, loadProjects } = useProjects()
+  
+  // Ensure projects are loaded when this component mounts
+  React.useEffect(() => {
+    // Only load if projects array is empty to prevent unnecessary calls
+    if (projects.length === 0) {
+      loadProjects()
+    }
+  }, []) // Remove loadProjects from dependencies to prevent infinite re-renders
   const [showModal, setShowModal] = useState(false)
   const [editingClient, setEditingClient] = useState(null)
   const [formData, setFormData] = useState({
@@ -68,7 +76,13 @@ const Clients = () => {
   }
 
   const getClientProjects = (clientId) => {
-    return projects.filter(project => project.clientId === clientId)
+    return projects.filter(project => {
+      // Handle both populated client object and client ID string
+      if (project.clientId && typeof project.clientId === 'object') {
+        return project.clientId._id === clientId;
+      }
+      return project.clientId === clientId;
+    })
   }
 
   if (loading) {
@@ -105,9 +119,11 @@ const Clients = () => {
           const totalRevenue = clientInvoices
             .filter(inv => inv.status === 'paid')
             .reduce((sum, inv) => sum + inv.amount, 0)
+          
+
 
           return (
-            <div key={client.id} className="bg-white rounded-lg shadow p-6">
+            <div key={client._id} className="bg-white rounded-lg shadow p-6">
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900">{client.name}</h3>

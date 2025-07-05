@@ -88,4 +88,114 @@ export const clientAPI = {
       method: 'DELETE',
     });
   },
+};
+
+// Project API calls
+export const projectAPI = {
+  // Get all projects
+  getProjects: async (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    const endpoint = queryString ? `/projects?${queryString}` : '/projects';
+    return apiCall(endpoint);
+  },
+
+  // Get single project
+  getProject: async (id) => {
+    return apiCall(`/projects/${id}`);
+  },
+
+  // Add new project
+  addProject: async (projectData) => {
+    return apiCall('/projects', {
+      method: 'POST',
+      body: JSON.stringify(projectData),
+    });
+  },
+
+  // Update project
+  updateProject: async (id, projectData) => {
+    return apiCall(`/projects/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(projectData),
+    });
+  },
+
+  // Delete project
+  deleteProject: async (id) => {
+    return apiCall(`/projects/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Archive/Unarchive project
+  toggleArchiveProject: async (id, isArchived) => {
+    return apiCall(`/projects/${id}/archive`, {
+      method: 'PATCH',
+      body: JSON.stringify({ isArchived }),
+    });
+  },
+
+  // Get project statistics
+  getProjectStats: async () => {
+    return apiCall('/projects/stats');
+  },
+};
+
+// Task API calls
+export const taskAPI = {
+  // Get all tasks
+  getTasks: async (params = {}) => {
+    const queryString = new URLSearchParams(params).toString();
+    const endpoint = queryString ? `/tasks?${queryString}` : '/tasks';
+    return apiCall(endpoint);
+  },
+
+  // Get single task
+  getTask: async (id) => {
+    return apiCall(`/tasks/${id}`);
+  },
+
+  // Add new task
+  addTask: async (taskData) => {
+    return apiCall('/tasks', {
+      method: 'POST',
+      body: JSON.stringify(taskData),
+    });
+  },
+
+  // Update task
+  updateTask: async (id, taskData) => {
+    return apiCall(`/tasks/${id}`, {
+      method: 'PUT',
+      body: JSON.stringify(taskData),
+    });
+  },
+
+  // Delete task
+  deleteTask: async (id) => {
+    return apiCall(`/tasks/${id}`, {
+      method: 'DELETE',
+    });
+  },
+
+  // Update task status
+  updateTaskStatus: async (id, status) => {
+    return apiCall(`/tasks/${id}/status`, {
+      method: 'PATCH',
+      body: JSON.stringify({ status }),
+    });
+  },
+
+  // Add time entry to task
+  addTimeEntry: async (id, timeEntryData) => {
+    return apiCall(`/tasks/${id}/time-entry`, {
+      method: 'POST',
+      body: JSON.stringify(timeEntryData),
+    });
+  },
+
+  // Get task statistics
+  getTaskStats: async () => {
+    return apiCall('/tasks/stats');
+  },
 }; 

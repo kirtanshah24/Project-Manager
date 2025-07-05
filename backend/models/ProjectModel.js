@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import mongoosePaginate from 'mongoose-paginate-v2';
 
 const projectSchema = new mongoose.Schema({
   userId: {
@@ -81,5 +82,8 @@ projectSchema.virtual('progress').get(function() {
   // This will be calculated based on completed tasks
   return 0;
 });
+
+// Add pagination plugin
+projectSchema.plugin(mongoosePaginate);
 
 export default mongoose.model('Project', projectSchema); 

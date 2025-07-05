@@ -1,7 +1,106 @@
-import React, { createContext, useContext, useState, useEffect } from 'react'
+import React, { createContext, useContext, useReducer, useCallback, useEffect } from 'react'
 import { toast } from 'react-toastify'
+import { projectAPI } from '../utils/api'
 
 const ProjectContext = createContext()
+
+const initialState = {
+  projects: [],
+  loading: false,
+  error: null,
+  stats: null,
+  filters: {
+    status: '',
+    priority: '',
+    search: '',
+    clientId: '',
+    startDate: '',
+    endDate: ''
+  },
+  pagination: {
+    page: 1,
+    limit: 10,
+    totalPages: 0,
+    totalDocs: 0
+  }
+}
+
+const projectReducer = (state, action) => {
+  switch (action.type) {
+    case 'SET_LOADING':
+      return { ...state, loading: action.payload }
+    
+    case 'SET_ERROR':
+      return { ...state, error: action.payload, loading: false }
+    
+    case 'SET_PROJECTS':
+      return { 
+        ...state, 
+        projects: action.payload.docs || action.payload,
+        pagination: {
+          page: action.payload.page || 1,
+          limit: action.payload.limit || 10,
+          totalPages: action.payload.totalPages || 0,
+          totalDocs: action.payload.totalDocs || 0
+        },
+        loading: false,
+        error: null
+      }
+    
+    case 'ADD_PROJECT':
+      return { 
+        ...state, 
+        projects: [action.payload, ...state.projects],
+        loading: false,
+        error: null
+      }
+    
+    case 'UPDATE_PROJECT':
+      return {
+        ...state,
+        projects: state.projects.map(project => 
+          project._id === action.payload._id ? action.payload : project
+        ),
+        loading: false,
+        error: null
+      }
+    
+    case 'DELETE_PROJECT':
+      return {
+        ...state,
+        projects: state.projects.filter(project => project._id !== action.payload),
+        loading: false,
+        error: null
+      }
+    
+    case 'SET_FILTERS':
+      return {
+        ...state,
+        filters: { ...state.filters, ...action.payload },
+        pagination: { ...state.pagination, page: 1 }
+      }
+    
+    case 'SET_PAGINATION':
+      return {
+        ...state,
+        pagination: { ...state.pagination, ...action.payload }
+      }
+    
+    case 'SET_STATS':
+      return {
+        ...state,
+        stats: action.payload,
+        loading: false,
+        error: null
+      }
+    
+    case 'CLEAR_ERROR':
+      return { ...state, error: null }
+    
+    default:
+      return state
+  }
+}
 
 export const useProjects = () => {
   const context = useContext(ProjectContext)
@@ -12,156 +111,162 @@ export const useProjects = () => {
 }
 
 export const ProjectProvider = ({ children }) => {
-  const [projects, setProjects] = useState([])
-  const [tasks, setTasks] = useState([])
+  const [state, dispatch] = useReducer(projectReducer, initialState)
 
-  useEffect(() => {
-    // Load data from localStorage
-    const storedProjects = localStorage.getItem('freelancer_projects')
-    const storedTasks = localStorage.getItem('freelancer_tasks')
+  // Load projects with filters and pagination
+  const loadProjects = useCallback(async (params = {}) => {
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true })
+      
+      const queryParams = {
+        page: state.pagination.page,
+        limit: state.pagination.limit,
+        ...state.filters,
+        ...params
+      }
 
-    if (storedProjects) setProjects(JSON.parse(storedProjects))
-    if (storedTasks) setTasks(JSON.parse(storedTasks))
+      const response = await projectAPI.getProjects(queryParams)
+      
+      if (response.success) {
+        dispatch({ type: 'SET_PROJECTS', payload: response.data })
+      } else {
+        dispatch({ type: 'SET_ERROR', payload: response.message })
+      }
+    } catch (error) {
+      console.error('Error loading projects:', error)
+      dispatch({ type: 'SET_ERROR', payload: 'Failed to load projects' })
+    }
+  }, [state.pagination.page, state.pagination.limit, state.filters])
+
+  // Add new project
+  const addProject = useCallback(async (projectData) => {
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true })
+      
+      const response = await projectAPI.addProject(projectData)
+      
+      if (response.success) {
+        dispatch({ type: 'ADD_PROJECT', payload: response.data.project })
+        return { success: true, data: response.data.project }
+      } else {
+        dispatch({ type: 'SET_ERROR', payload: response.message })
+        return { success: false, message: response.message }
+      }
+    } catch (error) {
+      console.error('Error adding project:', error)
+      dispatch({ type: 'SET_ERROR', payload: 'Failed to add project' })
+      return { success: false, message: 'Failed to add project' }
+    }
   }, [])
 
-  useEffect(() => {
-    // Save to localStorage whenever data changes
-    localStorage.setItem('freelancer_projects', JSON.stringify(projects))
-  }, [projects])
-
-  useEffect(() => {
-    localStorage.setItem('freelancer_tasks', JSON.stringify(tasks))
-  }, [tasks])
-
-  // Project CRUD operations
-  const addProject = (project) => {
-    const newProject = {
-      ...project,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-      status: 'active'
-    }
-    setProjects(prev => [...prev, newProject])
-    toast.success('Project created successfully!')
-  }
-
-  const updateProject = (id, updates) => {
-    setProjects(prev => prev.map(project => 
-      project.id === id ? { ...project, ...updates } : project
-    ))
-    toast.success('Project updated successfully!')
-  }
-
-  const deleteProject = (id) => {
-    setProjects(prev => prev.filter(project => project.id !== id))
-    // Also delete associated tasks
-    setTasks(prev => prev.filter(task => task.projectId !== id))
-    toast.success('Project deleted successfully!')
-  }
-
-  // Task CRUD operations
-  const addTask = (task) => {
-    if (task.isRecurring && task.recurrenceCount > 1) {
-      const newTasks = [];
-      const recurrenceId = `recur-${Date.now()}`;
-      let lastDueDate = task.dueDate ? new Date(task.dueDate) : new Date();
-
-      for (let i = 0; i < task.recurrenceCount; i++) {
-        if (i > 0) { // Calculate next due date for subsequent tasks
-          switch (task.recurringPattern) {
-            case 'daily':
-              lastDueDate.setDate(lastDueDate.getDate() + 1);
-              break;
-            case 'weekly':
-              lastDueDate.setDate(lastDueDate.getDate() + 7);
-              break;
-            case 'monthly':
-              lastDueDate.setMonth(lastDueDate.getMonth() + 1);
-              break;
-            default:
-              break;
-          }
-        }
-        
-        const instanceTask = {
-          ...task,
-          id: `${recurrenceId}-${i + 1}`,
-          createdAt: new Date().toISOString(),
-          status: 'pending',
-          timeSpent: 0,
-          recurrenceId,
-          instanceNumber: i + 1,
-          isVisible: i === 0, // Only the first task is visible initially
-          dueDate: task.dueDate ? new Date(lastDueDate).toISOString().split('T')[0] : null,
-          title: `${task.title} (${i + 1}/${task.recurrenceCount})`
-        };
-        newTasks.push(instanceTask);
+  // Update project
+  const updateProject = useCallback(async (id, projectData) => {
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true })
+      
+      const response = await projectAPI.updateProject(id, projectData)
+      
+      if (response.success) {
+        dispatch({ type: 'UPDATE_PROJECT', payload: response.data.project })
+        return { success: true, data: response.data.project }
+      } else {
+        dispatch({ type: 'SET_ERROR', payload: response.message })
+        return { success: false, message: response.message }
       }
-      setTasks(prev => [...prev, ...newTasks]);
-      toast.success(`${task.recurrenceCount} recurring tasks created!`);
+    } catch (error) {
+      console.error('Error updating project:', error)
+      dispatch({ type: 'SET_ERROR', payload: 'Failed to update project' })
+      return { success: false, message: 'Failed to update project' }
+    }
+  }, [])
 
-    } else {
-      const newTask = {
-        ...task,
-        id: Date.now().toString(),
-        createdAt: new Date().toISOString(),
-        status: 'pending',
-        isVisible: true,
+  // Delete project
+  const deleteProject = useCallback(async (id) => {
+    try {
+      dispatch({ type: 'SET_LOADING', payload: true })
+      
+      const response = await projectAPI.deleteProject(id)
+      
+      if (response.success) {
+        dispatch({ type: 'DELETE_PROJECT', payload: id })
+        return { success: true }
+      } else {
+        dispatch({ type: 'SET_ERROR', payload: response.message })
+        return { success: false, message: response.message }
       }
-      setTasks(prev => [...prev, newTask])
-      toast.success('Task created successfully!')
+    } catch (error) {
+      console.error('Error deleting project:', error)
+      dispatch({ type: 'SET_ERROR', payload: 'Failed to delete project' })
+      return { success: false, message: 'Failed to delete project' }
     }
-  }
+  }, [])
 
-  const updateTask = (id, updates) => {
-    let nextTaskToShow = null;
-
-    setTasks(prev => prev.map(task => {
-        if (task.id === id) {
-          // If task is being completed and is part of a recurring series
-          if (updates.status === 'completed' && task.recurrenceId) {
-            const currentInstance = task.instanceNumber;
-            const nextInstance = currentInstance + 1;
-            const nextTaskId = `${task.recurrenceId}-${nextInstance}`;
-            
-            // Find the next task in the series to make it visible
-            nextTaskToShow = prev.find(t => t.id === nextTaskId);
-          }
-          return { ...task, ...updates };
-        }
-        return task;
-      })
-    );
-    
-    // Make the next task visible
-    if (nextTaskToShow) {
-      setTasks(prev => prev.map(task => 
-        task.id === nextTaskToShow.id ? { ...task, isVisible: true } : task
-      ));
+  // Archive/Unarchive project
+  const toggleArchiveProject = useCallback(async (id, isArchived) => {
+    try {
+      const response = await projectAPI.toggleArchiveProject(id, isArchived)
+      
+      if (response.success) {
+        dispatch({ type: 'UPDATE_PROJECT', payload: response.data.project })
+        return { success: true, data: response.data.project }
+      } else {
+        return { success: false, message: response.message }
+      }
+    } catch (error) {
+      console.error('Error toggling project archive:', error)
+      return { success: false, message: 'Failed to toggle project archive' }
     }
+  }, [])
 
-    toast.success('Task updated successfully!')
-  }
+  // Load project statistics
+  const loadProjectStats = useCallback(async () => {
+    try {
+      const response = await projectAPI.getProjectStats()
+      
+      if (response.success) {
+        dispatch({ type: 'SET_STATS', payload: response.data })
+      }
+    } catch (error) {
+      console.error('Error loading project stats:', error)
+    }
+  }, [])
 
-  const deleteTask = (id) => {
-    setTasks(prev => prev.filter(task => task.id !== id))
-    toast.success('Task deleted successfully!')
-  }
+  // Set filters
+  const setFilters = useCallback((filters) => {
+    dispatch({ type: 'SET_FILTERS', payload: filters })
+  }, [])
 
-  const getProjectTasks = (projectId) => {
-    return tasks.filter(task => task.projectId === projectId)
-  }
+  // Set pagination
+  const setPagination = useCallback((pagination) => {
+    dispatch({ type: 'SET_PAGINATION', payload: pagination })
+  }, [])
+
+  // Clear error
+  const clearError = useCallback(() => {
+    dispatch({ type: 'CLEAR_ERROR' })
+  }, [])
+
+  // Load projects on mount and when filters/pagination change
+  useEffect(() => {
+    loadProjects()
+  }, [loadProjects])
+
+  // Load stats on mount
+  useEffect(() => {
+    loadProjectStats()
+  }, [loadProjectStats])
 
   const value = {
-    projects,
-    tasks,
+    ...state,
+    loadProjects,
     addProject,
     updateProject,
     deleteProject,
-    addTask,
-    updateTask,
-    deleteTask,
-    getProjectTasks,
+    toggleArchiveProject,
+    loadProjectStats,
+    setFilters,
+    setPagination,
+    clearError
   }
 
   return (

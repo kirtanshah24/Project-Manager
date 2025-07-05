@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import mongoosePaginate from 'mongoose-paginate-v2';
 
 const taskSchema = new mongoose.Schema({
   userId: {
@@ -110,5 +111,8 @@ taskSchema.virtual('totalTimeSpent').get(function() {
     return total + (entry.duration || 0);
   }, 0);
 });
+
+// Add pagination plugin
+taskSchema.plugin(mongoosePaginate);
 
 export default mongoose.model('Task', taskSchema); 

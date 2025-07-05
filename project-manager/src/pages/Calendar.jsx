@@ -5,10 +5,12 @@ import timeGridPlugin from '@fullcalendar/timegrid';
 import listPlugin from '@fullcalendar/list';
 import interactionPlugin from '@fullcalendar/interaction';
 import { useProjects } from '../context/ProjectContext';
+import { useTask } from '../context/TaskContext';
 import { useNavigate } from 'react-router-dom';
 
 const Calendar = () => {
-  const { projects, tasks } = useProjects();
+  const { projects } = useProjects();
+  const { tasks } = useTask();
   const navigate = useNavigate();
   const [isMobile, setIsMobile] = useState(false);
 
@@ -27,7 +29,7 @@ const Calendar = () => {
   const projectEvents = projects
     .filter(p => p.startDate && p.endDate)
     .map(project => ({
-      id: `proj_${project.id}`,
+      id: `proj_${project._id}`,
       title: project.name,
       start: project.startDate,
       end: project.endDate,
@@ -35,14 +37,14 @@ const Calendar = () => {
       borderColor: '#3b82f6',
       extendedProps: {
         type: 'project',
-        id: project.id,
+        id: project._id,
       }
     }));
 
   const taskEvents = tasks
     .filter(t => t.dueDate)
     .map(task => ({
-      id: `task_${task.id}`,
+      id: `task_${task._id}`,
       title: task.title,
       start: task.dueDate,
       allDay: true,
@@ -50,7 +52,7 @@ const Calendar = () => {
       borderColor: task.status === 'completed' ? '#10b981' : '#f59e0b',
       extendedProps: {
         type: 'task',
-        id: task.id,
+        id: task._id,
       }
     }));
   
@@ -59,7 +61,7 @@ const Calendar = () => {
   const handleEventClick = (clickInfo) => {
     const { type, id } = clickInfo.event.extendedProps;
     if (type === 'project') {
-      console.log(`Clicked project ${id}`);
+      navigate(`/projects/${id}`);
     } else if (type === 'task') {
       navigate('/tasks');
     }

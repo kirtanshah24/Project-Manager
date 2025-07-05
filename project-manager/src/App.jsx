@@ -7,6 +7,7 @@ import 'react-toastify/dist/ReactToastify.css'
 import { ProjectProvider } from './context/ProjectContext'
 import { ClientProvider } from './context/ClientContext'
 import { AuthProvider } from './context/AuthContext'
+import { TaskProvider } from './context/TaskContext'
 
 // Components
 import Navbar from './components/Navbar'
@@ -47,7 +48,8 @@ const App = () => {
     <AuthProvider>
       <ProjectProvider>
         <ClientProvider>
-          <div className="min-h-screen bg-gray-50">
+          <TaskProvider>
+            <div className="min-h-screen bg-gray-50">
             {!isAuthRoute && (
               <Navbar toggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
             )}
@@ -78,6 +80,7 @@ const App = () => {
             </div>
             <ToastContainer position="top-right" />
           </div>
+        </TaskProvider>
         </ClientProvider>
       </ProjectProvider>
     </AuthProvider>

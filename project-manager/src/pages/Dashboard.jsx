@@ -1,10 +1,12 @@
 import React from 'react'
 import { useProjects } from '../context/ProjectContext'
 import { useClients } from '../context/ClientContext'
+import { useTask } from '../context/TaskContext'
 
 const Dashboard = () => {
-  const { projects, tasks } = useProjects()
+  const { projects } = useProjects()
   const { clients, invoices, expenses } = useClients()
+  const { tasks } = useTask()
 
   // Calculate statistics
   const activeProjects = projects.filter(p => p.status === 'active').length
@@ -93,7 +95,7 @@ const Dashboard = () => {
             {recentProjects.length > 0 ? (
               <div className="space-y-4">
                 {recentProjects.map((project) => (
-                  <div key={project.id} className="flex items-center justify-between">
+                  <div key={project._id} className="flex items-center justify-between">
                     <div>
                       <h3 className="font-medium text-gray-900">{project.name}</h3>
                       <p className="text-sm text-gray-500">{project.clientName}</p>
@@ -123,7 +125,7 @@ const Dashboard = () => {
             {upcomingDeadlines.length > 0 ? (
               <div className="space-y-4">
                 {upcomingDeadlines.map((task) => (
-                  <div key={task.id} className="flex items-center justify-between">
+                  <div key={task._id} className="flex items-center justify-between">
                     <div>
                       <h3 className="font-medium text-gray-900">{task.title}</h3>
                       <p className="text-sm text-gray-500">{task.projectName}</p>

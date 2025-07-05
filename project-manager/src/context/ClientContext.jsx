@@ -17,19 +17,16 @@ export const ClientProvider = ({ children }) => {
   const [invoices, setInvoices] = useState([])
   const [expenses, setExpenses] = useState([])
   const [loading, setLoading] = useState(false)
-
-  // Load clients from API on component mount
-  useEffect(() => {
-    loadClients()
-  }, [])
+  const [isInitialized, setIsInitialized] = useState(false)
 
   // Load clients from API
-  const loadClients = async () => {
+  const loadClients = React.useCallback(async () => {
     try {
       setLoading(true)
       const response = await clientAPI.getClients()
       if (response.success) {
-        setClients(response.data.docs || response.data)
+        const clientsData = response.data.docs || response.data
+        setClients(clientsData)
       }
     } catch (error) {
       console.error('Error loading clients:', error)
@@ -37,7 +34,15 @@ export const ClientProvider = ({ children }) => {
     } finally {
       setLoading(false)
     }
-  }
+  }, [])
+
+  // Load clients from API on component mount
+  useEffect(() => {
+    if (!isInitialized) {
+      loadClients()
+      setIsInitialized(true)
+    }
+  }, [isInitialized, loadClients])
 
   // Client CRUD operations
   const addClient = async (clientData) => {
