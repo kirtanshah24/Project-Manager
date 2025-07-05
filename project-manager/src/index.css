@@ -1,3 +1,157 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Mobile-friendly FullCalendar styles */
+@media (max-width: 768px) {
+  .fc {
+    font-size: 14px;
+  }
+  
+  .fc-toolbar {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .fc-toolbar-chunk {
+    display: flex;
+    justify-content: center;
+  }
+  
+  .fc-button {
+    padding: 6px 12px;
+    font-size: 12px;
+  }
+  
+  .fc-daygrid-day {
+    min-height: 60px;
+  }
+  
+  .fc-daygrid-day-events {
+    min-height: 20px;
+  }
+  
+  .fc-event {
+    font-size: 11px;
+    padding: 2px 4px;
+    margin: 1px 0;
+  }
+  
+  .fc-list-event {
+    padding: 8px 12px;
+  }
+  
+  .fc-list-event-title {
+    font-size: 14px;
+  }
+  
+  .fc-list-event-time {
+    font-size: 12px;
+  }
+  
+  .fc-daygrid-day-number {
+    font-size: 12px;
+    padding: 4px;
+  }
+  
+  .fc-col-header-cell {
+    padding: 4px;
+  }
+  
+  .fc-col-header-cell-cushion {
+    font-size: 12px;
+  }
+}
+
+/* Touch-friendly interactions */
+.fc-event {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.fc-event:hover {
+  transform: scale(1.02);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Better mobile scrolling */
+.fc-scroller {
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Mobile-optimized list view */
+@media (max-width: 768px) {
+  .fc-list-view {
+    font-size: 14px;
+  }
+  
+  .fc-list-day-cushion {
+    padding: 8px 12px;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  
+  .fc-list-event-dot {
+    margin-right: 8px;
+  }
+}
+
+/* PDF Generation Styles */
+@media print {
+  * {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+  
+  body {
+    margin: 0;
+    padding: 0;
+  }
+  
+  .invoice-container {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  
+  .invoice-table {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  
+  .invoice-table tr {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+}
+
+/* Ensure proper rendering for html2canvas */
+.invoice-pdf-container {
+  background: white !important;
+  color: black !important;
+  font-family: Arial, sans-serif !important;
+  line-height: 1.4 !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+.invoice-pdf-container * {
+  box-sizing: border-box !important;
+}
+
+.invoice-pdf-container input,
+.invoice-pdf-container textarea,
+.invoice-pdf-container select {
+  border: none !important;
+  outline: none !important;
+  background: transparent !important;
+  font-family: inherit !important;
+  font-size: inherit !important;
+  color: inherit !important;
+}
+
+.invoice-pdf-container input:focus,
+.invoice-pdf-container textarea:focus,
+.invoice-pdf-container select:focus {
+  background: rgba(59, 130, 246, 0.1) !important;
+  border-radius: 4px !important;
+}

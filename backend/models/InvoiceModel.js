@@ -139,7 +139,6 @@ const invoiceSchema = new mongoose.Schema({
 invoiceSchema.index({ userId: 1, status: 1 });
 invoiceSchema.index({ userId: 1, clientId: 1 });
 invoiceSchema.index({ userId: 1, dueDate: 1 });
-invoiceSchema.index({ invoiceNumber: 1 });
 
 // Pre-save middleware to calculate totals
 invoiceSchema.pre('save', function(next) {

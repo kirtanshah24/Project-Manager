@@ -1,5 +1,5 @@
-import React from 'react'
-import { Routes, Route } from 'react-router-dom'
+import React, { useState } from 'react'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 
@@ -23,19 +23,44 @@ import Expenses from './pages/Expenses'
 import Calendar from './pages/Calendar'
 import Analytics from './pages/Analytics'
 import Login from './pages/Login'
+import ForgotPassword from './pages/ForgotPassword'
 import ProjectDetail from './pages/ProjectDetail'
 
 const App = () => {
+  const location = useLocation()
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+  
+  // List of routes that should NOT show the main layout
+  const authRoutes = ['/login', '/forgot-password']
+  const isAuthRoute = authRoutes.includes(location.pathname)
+
+  const toggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen)
+  }
+
+  const closeSidebar = () => {
+    setIsSidebarOpen(false)
+  }
+
   return (
     <AuthProvider>
       <ProjectProvider>
         <ClientProvider>
           <div className="min-h-screen bg-gray-50">
-            <Navbar />
+            {!isAuthRoute && (
+              <Navbar toggleSidebar={toggleSidebar} isSidebarOpen={isSidebarOpen} />
+            )}
             <div className="flex">
-              <Sidebar />
-              <main className="flex-1 p-6">
+              {!isAuthRoute && (
+                <Sidebar isOpen={isSidebarOpen} onClose={closeSidebar} />
+              )}
+              <main className="flex-1 p-4 lg:p-6">
                 <Routes>
+                  {/* Auth routes */}
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/forgot-password" element={<ForgotPassword />} />
+
+                  {/* Main app routes */}
                   <Route path="/" element={<Dashboard />} />
                   <Route path="/projects" element={<Projects />} />
                   <Route path="/clients" element={<Clients />} />
@@ -45,7 +70,6 @@ const App = () => {
                   <Route path="/expenses" element={<Expenses />} />
                   <Route path="/calendar" element={<Calendar />} />
                   <Route path="/analytics" element={<Analytics />} />
-                  <Route path="/login" element={<Login />} />
                   <Route path="/projects/:id" element={<ProjectDetail />} />
                 </Routes>
               </main>

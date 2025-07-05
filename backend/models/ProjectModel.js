@@ -9,7 +9,7 @@ const projectSchema = new mongoose.Schema({
   clientId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Client',
-    required: true
+    // required: true (removed to make optional)
   },
   name: {
     type: String,

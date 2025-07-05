@@ -19,16 +19,16 @@ const Projects = () => {
     e.preventDefault()
     const client = clients.find(c => c.id === formData.clientId)
     
+    const projectData = {
+      ...formData,
+      clientId: formData.clientId || null,
+      clientName: client?.name || '',
+    }
+    
     if (editingProject) {
-      updateProject(editingProject.id, {
-        ...formData,
-        clientName: client?.name || ''
-      })
+      updateProject(editingProject.id, projectData)
     } else {
-      addProject({
-        ...formData,
-        clientName: client?.name || ''
-      })
+      addProject(projectData)
     }
     
     setFormData({
@@ -203,82 +203,48 @@ const Projects = () => {
             
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Project Name
-                </label>
+                <label className="block text-sm font-medium text-gray-700">Project Name</label>
                 <input
                   type="text"
-                  required
                   value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={e => setFormData({ ...formData, name: e.target.value })}
+                  required
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                 />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Description
-                </label>
+                <label className="block text-sm font-medium text-gray-700">Description</label>
                 <textarea
                   value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  rows="3"
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={e => setFormData({ ...formData, description: e.target.value })}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                 />
               </div>
-
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Client
-                </label>
+                <label className="block text-sm font-medium text-gray-700">Client (optional)</label>
                 <select
-                  required
                   value={formData.clientId}
-                  onChange={(e) => setFormData({...formData, clientId: e.target.value})}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={e => setFormData({ ...formData, clientId: e.target.value })}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
                 >
-                  <option value="">Select a client</option>
-                  {clients.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+                  <option value="">No client</option>
+                  {clients.map(client => (
+                    <option key={client.id} value={client.id}>{client.name}</option>
+                  ))}
                 </select>
               </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Deadline
-                  </label>
-                  <input
-                    type="date"
-                    value={formData.deadline}
-                    onChange={(e) => setFormData({...formData, deadline: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Deadline</label>
+                <input
+                  type="date"
+                  value={formData.deadline}
+                  onChange={e => setFormData({ ...formData, deadline: e.target.value })}
+                  className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2"
+                />
               </div>
-
-              <div className="flex space-x-3 pt-4">
-                <button
-                  type="submit"
-                  className="flex-1 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition-colors"
-                >
-                  {editingProject ? 'Update' : 'Create'}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowModal(false)
-                    setEditingProject(null)
-                    setFormData({
-                      name: '',
-                      description: '',
-                      clientId: '',
-                      deadline: '',
-                    })
-                  }}
-                  className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-400 transition-colors"
-                >
-                  Cancel
-                </button>
+              <div className="flex justify-end space-x-2">
+                <button type="button" onClick={() => { setShowModal(false); setEditingProject(null); }} className="px-4 py-2 bg-gray-200 rounded-md">Cancel</button>
+                <button type="submit" className="px-4 py-2 bg-blue-600 text-white rounded-md">{editingProject ? 'Update' : 'Create'}</button>
               </div>
             </form>
           </div>

@@ -9,7 +9,7 @@ const taskSchema = new mongoose.Schema({
   projectId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Project',
-    required: true
+    // required: true (removed to make optional)
   },
   title: {
     type: String,
