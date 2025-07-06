@@ -5,6 +5,7 @@ import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
   LineChart, Line, PieChart, Pie, Cell,
 } from 'recharts';
+import { formatINR } from '../utils/api';
 
 const Analytics = () => {
   const { projects, tasks } = useProjects();
@@ -68,7 +69,7 @@ const Analytics = () => {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis dataKey="name" />
             <YAxis />
-            <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
+            <Tooltip formatter={(value) => formatINR(value)} />
             <Legend />
             <Bar dataKey="earnings" fill="#8884d8" />
           </BarChart>
@@ -80,7 +81,7 @@ const Analytics = () => {
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis type="number" />
             <YAxis type="category" dataKey="name" width={100} />
-            <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
+            <Tooltip formatter={(value) => formatINR(value)} />
             <Legend />
             <Bar dataKey="earnings" fill="#82ca9d" />
           </BarChart>
@@ -103,7 +104,7 @@ const Analytics = () => {
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
+            <Tooltip formatter={(value) => formatINR(value)} />
             <Legend />
           </PieChart>
         </ChartCard>

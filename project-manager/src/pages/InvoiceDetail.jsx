@@ -1,9 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useClients } from '../context/ClientContext';
 import { useProjects } from '../context/ProjectContext';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { formatINR } from '../utils/api';
 
 // EditableField component for inline editing
 const EditableField = ({ value, name, onChange, isTextarea = false, className = '', ...props }) => {
@@ -84,6 +85,7 @@ const EditableField = ({ value, name, onChange, isTextarea = false, className = 
 const InvoiceDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const location = useLocation();
   const { invoices, clients, addInvoice, updateInvoiceStatus } = useClients();
   const { projects } = useProjects();
   const invoiceRef = React.useRef();
@@ -101,7 +103,18 @@ const InvoiceDetail = () => {
     status: 'draft',
   };
 
-  const [invoiceData, setInvoiceData] = useState(initialInvoiceState);
+  // If coming from create modal, use navigation state
+  const draftFromState = isNew && location.state && location.state.invoiceDraft;
+  const [invoiceData, setInvoiceData] = useState(() => {
+    if (draftFromState) {
+      // If clientName is present, set billedTo to clientName
+      return {
+        ...draftFromState,
+        billedTo: draftFromState.clientName || draftFromState.billedTo || '',
+      };
+    }
+    return initialInvoiceState;
+  });
   const [selectedProject, setSelectedProject] = useState('');
 
   useEffect(() => {
@@ -220,12 +233,12 @@ const InvoiceDetail = () => {
     });
   };
 
+  // Save handler for new invoice
   const handleSave = () => {
-    const client = clients.find(c => c.name === invoiceData.billedTo);
     addInvoice({
       ...invoiceData,
+      id: Date.now().toString(),
       amount: total,
-      clientId: client?.id,
       dueDate: new Date(new Date().setDate(new Date().getDate() + 14)).toISOString(),
     });
     navigate('/invoices');
@@ -293,10 +306,13 @@ const InvoiceDetail = () => {
         <div className="flex flex-col lg:flex-row mb-8 lg:mb-16">
           <div className="w-full lg:w-1/2 lg:pr-8 mb-4 lg:mb-0">
             <h2 className="text-sm font-bold tracking-wider mb-2">BILLED TO:</h2>
-            <select name="billedTo" value={invoiceData.billedTo} onChange={handleInputChange} className="text-base lg:text-lg bg-transparent p-1 -m-1 focus:bg-gray-100 focus:outline-blue-200 rounded-sm w-full">
-                <option value="">Select a Client</option>
-                {clients.map(c => <option key={c.id} value={c.name}>{c.name}</option>)}
-            </select>
+            <input
+              name="billedTo"
+              value={invoiceData.billedTo}
+              onChange={handleInputChange}
+              className="text-base lg:text-lg bg-transparent p-1 -m-1 focus:bg-gray-100 focus:outline-blue-200 rounded-sm w-full border-b border-gray-300"
+              placeholder="Client Name"
+            />
           </div>
           <div className="w-full lg:w-1/2">
             <h2 className="text-sm font-bold tracking-wider mb-2">PAY TO:</h2>
@@ -345,7 +361,7 @@ const InvoiceDetail = () => {
           <div className="w-full lg:w-1/2">
             <div className="flex justify-between py-2">
               <span className="text-base lg:text-lg">Sub Total</span>
-              <span className="text-base lg:text-lg">${subTotal.toFixed(2)}</span>
+              <span className="text-base lg:text-lg">{formatINR(subTotal)}</span>
             </div>
             <div className="flex justify-between items-center py-2 border-b-2 border-gray-300">
               <span className="text-base lg:text-lg">Discount (%)</span>
@@ -353,7 +369,7 @@ const InvoiceDetail = () => {
             </div>
             <div className="flex justify-between py-4">
               <span className="text-lg lg:text-xl font-bold">TOTAL</span>
-              <span className="text-lg lg:text-xl font-bold">${total.toFixed(2)}</span>
+              <span className="text-lg lg:text-xl font-bold">{formatINR(total)}</span>
             </div>
           </div>
         </div>
@@ -435,7 +451,7 @@ const InvoiceDetail = () => {
               {invoice.items.map((item, index) => (
                 <tr key={index}>
                   <td className="py-1 pr-2 border-b border-gray-300 text-base lg:text-lg">{item.description}</td>
-                  <td className="py-1 px-4 border-b border-gray-300 text-base lg:text-lg text-right">${(parseFloat(item.amount) || 0).toFixed(2)}</td>
+                  <td className="py-1 px-4 border-b border-gray-300 text-base lg:text-lg text-right">{formatINR(parseFloat(item.amount) || 0)}</td>
                 </tr>
               ))}
             </tbody>
@@ -446,15 +462,15 @@ const InvoiceDetail = () => {
           <div className="w-full lg:w-1/2">
             <div className="flex justify-between py-2">
               <span className="text-base lg:text-lg">Sub Total</span>
-              <span className="text-base lg:text-lg">${subTotal.toFixed(2)}</span>
+              <span className="text-base lg:text-lg">{formatINR(subTotal)}</span>
             </div>
             <div className="flex justify-between items-center py-2 border-b-2 border-gray-300">
               <span className="text-base lg:text-lg">Package Discount ({invoice.discount}%)</span>
-              <span className="text-base lg:text-lg">-${discountAmount.toFixed(2)}</span>
+              <span className="text-base lg:text-lg">-${formatINR(discountAmount)}</span>
             </div>
             <div className="flex justify-between py-4">
               <span className="text-lg lg:text-xl font-bold">TOTAL</span>
-              <span className="text-lg lg:text-xl font-bold">${total.toFixed(2)}</span>
+              <span className="text-lg lg:text-xl font-bold">{formatINR(total)}</span>
             </div>
           </div>
         </div>

@@ -4,6 +4,7 @@ import { useProjects } from '../context/ProjectContext';
 import { useClients } from '../context/ClientContext';
 import { useExpenses } from '../context/ExpenseContext';
 import { toast } from 'react-toastify';
+import { formatINR } from '../utils/api';
 
 // Reusable Card Component
 const InfoCard = ({ title, children, actions }) => (
@@ -199,7 +200,7 @@ const ProjectDetail = () => {
                             {projectExpenses.map(exp => (
                                 <li key={exp._id} className="py-3 flex justify-between items-center">
                                     <p className="text-gray-800">{exp.description}</p>
-                                    <p className="font-semibold">${exp.amount.toFixed(2)}</p>
+                                    <p className="font-semibold">{formatINR(exp.amount)}</p>
                                     <button onClick={() => deleteExpense(exp._id)} className="text-sm text-red-600">Delete</button>
                                 </li>
                             ))}

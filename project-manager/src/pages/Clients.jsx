@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useClients } from '../context/ClientContext'
 import { useProjects } from '../context/ProjectContext'
+import { formatINR } from '../utils/api'
 
 const Clients = () => {
   const { clients, addClient, updateClient, deleteClient, getClientInvoices, loading } = useClients()
@@ -168,7 +169,7 @@ const Clients = () => {
                   <div className="text-xs text-gray-500">Projects</div>
                 </div>
                 <div className="text-center">
-                  <div className="text-lg font-semibold text-gray-900">${totalRevenue.toLocaleString()}</div>
+                  <div className="text-lg font-semibold text-gray-900">{formatINR(totalRevenue)}</div>
                   <div className="text-xs text-gray-500">Revenue</div>
                 </div>
               </div>

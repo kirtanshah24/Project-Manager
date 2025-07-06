@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useProjects } from '../context/ProjectContext';
 import { useTask } from '../context/TaskContext';
 import { useExpenses } from '../context/ExpenseContext';
+import { formatINR } from '../utils/api';
 
 const Expenses = () => {
   const { projects } = useProjects();
@@ -103,14 +104,14 @@ const Expenses = () => {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <StatCard
             title="Total Expenses"
-            value={`$${stats.totalAmount.toLocaleString()}`}
+            value={`₹${formatINR(stats.totalAmount)}`}
             subtitle={`${stats.totalCount} entries`}
             icon="💳"
             color="bg-red-100 text-red-600"
           />
           <StatCard
             title="This Month"
-            value={`$${stats.monthly.find(m => m._id === new Date().getMonth() + 1)?.total.toLocaleString() || '0'}`}
+            value={`₹${formatINR(stats.monthly.find(m => m._id === new Date().getMonth() + 1)?.total || 0)}`}
             subtitle="Current month"
             icon="📅"
             color="bg-blue-100 text-blue-600"
@@ -153,7 +154,7 @@ const Expenses = () => {
                       </div>
                       <div className="text-right">
                         <p className="text-lg font-semibold text-red-600">
-                          ${totalExpenses.toFixed(2)}
+                          {formatINR(totalExpenses)}
                         </p>
                         <p className="text-sm text-gray-500">
                           {taskExpenses.length} expense{taskExpenses.length !== 1 ? 's' : ''}
@@ -168,7 +169,7 @@ const Expenses = () => {
                             <span className="text-sm text-gray-700">{expense.description}</span>
                             <div className="flex items-center space-x-2">
                               <span className="text-sm font-medium text-red-600">
-                                ${expense.amount.toFixed(2)}
+                                {formatINR(expense.amount)}
                               </span>
                               <button
                                 onClick={() => handleDeleteExpense(expense._id)}
@@ -239,7 +240,7 @@ const Expenses = () => {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Amount ($) *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Amount (₹) *</label>
                 <input
                   type="number"
                   step="0.01"

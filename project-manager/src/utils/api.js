@@ -251,4 +251,9 @@ export const expenseAPI = {
     const endpoint = queryString ? `/expenses/stats?${queryString}` : '/expenses/stats';
     return apiCall(endpoint);
   },
-}; 
+};
+
+// Utility function to format currency in INR
+export function formatINR(amount) {
+  return new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR' }).format(amount);
+} 

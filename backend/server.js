@@ -9,6 +9,7 @@ import clientRoutes from "./routes/clientRoutes.js";
 import projectRoutes from "./routes/projectRoutes.js";
 import taskRoutes from "./routes/taskRoutes.js";
 import expenseRoutes from "./routes/expenseRoutes.js";
+import invoiceRoutes from "./routes/invoiceRoutes.js";
 
 // app config 
 const app = express();
@@ -25,6 +26,7 @@ app.use("/api/clients", clientRoutes);
 app.use("/api/projects", projectRoutes);
 app.use("/api/tasks", taskRoutes);
 app.use("/api/expenses", expenseRoutes);
+app.use("/api/invoices", invoiceRoutes);
 
 app.get("/", (req, res) => {
     res.send('API is running');

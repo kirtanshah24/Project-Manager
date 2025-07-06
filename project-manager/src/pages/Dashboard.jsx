@@ -3,6 +3,7 @@ import { useProjects } from '../context/ProjectContext'
 import { useClients } from '../context/ClientContext'
 import { useTask } from '../context/TaskContext'
 import { useExpenses } from '../context/ExpenseContext'
+import { formatINR } from '../utils/api'
 
 const Dashboard = () => {
   const { projects } = useProjects()
@@ -72,14 +73,14 @@ const Dashboard = () => {
         />
         <StatCard
           title="Total Revenue"
-          value={`$${totalRevenue.toLocaleString()}`}
+          value={formatINR(totalRevenue)}
           subtitle={`${pendingInvoices} pending invoices`}
           icon="💰"
           color="bg-yellow-100 text-yellow-600"
         />
         <StatCard
           title="Total Expenses"
-          value={`$${totalExpenses.toLocaleString()}`}
+          value={formatINR(totalExpenses)}
           subtitle={`${expenses.length} entries`}
           icon="💳"
           color="bg-red-100 text-red-600"

@@ -101,7 +101,17 @@ const invoiceSchema = new mongoose.Schema({
   },
   currency: {
     type: String,
-    default: 'USD'
+    default: 'INR'
+  },
+  clientName: {
+    type: String,
+    required: false,
+    trim: true
+  },
+  fileUrl: {
+    type: String,
+    required: false,
+    trim: true
   },
   notes: {
     type: String,
